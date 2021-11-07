@@ -27,14 +27,7 @@ public class PlayerBehaviour : MonoBehaviour
         CheckIfGrounded();
     }
 
-    private void CheckIfGrounded()
-    {
-        //throw new System.NotImplementedException();
-        RaycastHit2D hit = Physics2D.CircleCast(groundOrigin.position, groundRadius, Vector2.down, groundRadius, groundLayerMask);
-
-        isGrounded = (hit) ? true : false;
-
-    }
+  
 
     private void Move()
     {
@@ -45,6 +38,13 @@ public class PlayerBehaviour : MonoBehaviour
             float x = Input.GetAxisRaw("Horizontal");
             float y = Input.GetAxisRaw("Vertical");
             float jump = Input.GetAxisRaw("Jump");
+
+            //check for flip
+            if (x != 0)
+            {
+                x = FlipAnimation(x);
+            }
+
             Vector2 worldTouch = new Vector2();
 
             foreach (var touch in Input.touches)
@@ -55,12 +55,34 @@ public class PlayerBehaviour : MonoBehaviour
             float horizontalMoveForce = x * horizontalForces;// * deltaTime;
             float jumpMoveForce = jump * verticalForce; //* deltaTime;
 
+            float mass = rigidbody.mass * rigidbody.gravityScale;
 
-            rigidbody.AddForce(new Vector2(horizontalMoveForce, jumpMoveForce));
+            rigidbody.AddForce(new Vector2(horizontalMoveForce, jumpMoveForce) * mass);
             rigidbody.velocity *= 0.99f;
         }
        
     }
+
+
+    private void CheckIfGrounded()
+    {
+        //throw new System.NotImplementedException();
+        RaycastHit2D hit = Physics2D.CircleCast(groundOrigin.position, groundRadius, Vector2.down, groundRadius, groundLayerMask);
+
+        isGrounded = (hit) ? true : false;
+
+    }
+
+    private float FlipAnimation(float x)
+    {
+        //depending on direction scale across the x axis either 1 or -1
+        x = (x > 0) ? 1 : -1;
+
+        transform.localScale = new Vector3(x, 1.0f);
+        return x;
+
+    }
+    //UTILITIES
 
     private void OnDrawGizmos()
     {
